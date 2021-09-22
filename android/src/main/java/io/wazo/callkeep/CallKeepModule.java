@@ -262,6 +262,9 @@ public class CallKeepModule {
         Log.d(TAG, "displayIncomingCall number: " + number + ", callerName: " + callerName);
 
         Bundle extras = new Bundle();
+        
+        Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);
+        extras.putParcelable(TelecomManager.EXTRA_INCOMING_CALL_ADDRESS, uri);
         extras.putString(EXTRA_CALLER_NAME, callerName);
         extras.putString(EXTRA_CALL_UUID, uuid);
 

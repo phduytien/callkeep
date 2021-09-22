@@ -131,7 +131,7 @@ public class VoiceConnectionService extends ConnectionService {
         Connection incomingCallConnection = createConnection(request);
         incomingCallConnection.setRinging();
         incomingCallConnection.setInitialized();
-
+        incomingCallConnection.setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);
         startForegroundService();
 
         return incomingCallConnection;
