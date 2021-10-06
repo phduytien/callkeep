@@ -52,7 +52,6 @@ public class VoiceConnection extends Connection {
         String name = handle.get(EXTRA_CALLER_NAME);
 
         if (name != null && !name.equals("")) {
-            setAddress(name, TelecomManager.PRESENTATION_ALLOWED);
             setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);
         }
     }
