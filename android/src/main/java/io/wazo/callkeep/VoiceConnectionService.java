@@ -126,7 +126,6 @@ public class VoiceConnectionService extends ConnectionService {
     @Override
     public Connection onCreateIncomingConnection(PhoneAccountHandle connectionManagerPhoneAccount, ConnectionRequest request) {
         Bundle extra = request.getExtras();
-        Uri number = request.getAddress();
         String name = extra.getString(EXTRA_CALLER_NAME);
         Connection incomingCallConnection = createConnection(request);
         incomingCallConnection.setRinging();
