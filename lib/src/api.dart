@@ -1,16 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart'
-    show
-        AlertDialog,
-        BuildContext,
-        FlatButton,
-        Navigator,
-        Text,
-        TextButton,
-        Widget,
-        showDialog;
+    show BuildContext, Widget, showDialog, Container;
+import 'package:flutter/services.dart';
 import 'package:flutter/services.dart' show MethodChannel;
 
 import 'actions.dart';
@@ -31,10 +23,15 @@ class FlutterCallkeep extends EventManager {
   static const MethodChannel _channel = MethodChannel('FlutterCallKeep.Method');
   static const MethodChannel _event = MethodChannel('FlutterCallKeep.Event');
   BuildContext? _context;
+  Widget? _dialogWidget;
 
   Future<void> setup(
-      BuildContext? context, Map<String, dynamic> options) async {
+    BuildContext? context,
+    Map<String, dynamic> options, {
+    Widget? dialogWidget,
+  }) async {
     _context = context;
+    _dialogWidget = dialogWidget;
     if (!isIOS) {
       await _setupAndroid(options['android'] as Map<String, dynamic>);
       return;
@@ -57,11 +54,10 @@ class FlutterCallkeep extends EventManager {
     return _channel.invokeMethod<void>('registerEvents', <String, dynamic>{});
   }
 
-  Future<bool> hasDefaultPhoneAccount(
-      BuildContext context, Map<String, dynamic> options) async {
+  Future<bool> hasDefaultPhoneAccount(BuildContext context) async {
     _context = context;
     if (!isIOS) {
-      return await _hasDefaultPhoneAccount(options);
+      return await _hasDefaultPhoneAccount();
     }
 
     // return true on iOS because we don't want to block the endUser
@@ -73,9 +69,9 @@ class FlutterCallkeep extends EventManager {
         .invokeMethod<bool>('checkDefaultPhoneAccount', <String, dynamic>{});
   }
 
-  Future<bool> _hasDefaultPhoneAccount(Map<String, dynamic> options) async {
+  Future<bool> _hasDefaultPhoneAccount() async {
     final hasDefault = await _checkDefaultPhoneAccount();
-    final shouldOpenAccounts = await _alert(options, hasDefault);
+    final shouldOpenAccounts = await _alert(hasDefault);
     if (shouldOpenAccounts) {
       await _openPhoneAccounts();
       return true;
@@ -301,7 +297,7 @@ class FlutterCallkeep extends EventManager {
     await _channel.invokeMethod<void>('setup', {'options': options});
     final showAccountAlert = await _checkPhoneAccountPermission(
         options['additionalPermissions'] as List<String>);
-    final shouldOpenAccounts = await _alert(options, showAccountAlert);
+    final shouldOpenAccounts = await _alert(showAccountAlert);
 
     if (shouldOpenAccounts) {
       await _openPhoneAccounts();
@@ -311,7 +307,7 @@ class FlutterCallkeep extends EventManager {
   }
 
   Future<void> openPhoneAccounts() async {
-    _openPhoneAccounts();
+    await _openPhoneAccounts();
   }
 
   Future<void> _openPhoneAccounts() async {
@@ -336,45 +332,23 @@ class FlutterCallkeep extends EventManager {
     return false;
   }
 
-  Future<bool> _alert(
-      Map<String, dynamic> options, bool? showAccountAlert) async {
+  Future<bool> _alert(bool? showAccountAlert) async {
     if (_context == null ||
         (showAccountAlert != null && showAccountAlert == false)) {
       return false;
     }
-    var resp = await _showAlertDialog(
-        _context!,
-        options['alertTitle'] as String,
-        options['alertDescription'] as String,
-        options['cancelButton'] as String,
-        options['okButton'] as String);
+    var resp = await _showAlertDialog(_context!);
     if (resp != null) {
       return resp;
     }
     return false;
   }
 
-  Future<bool?> _showAlertDialog(BuildContext context, String? alertTitle,
-      String? alertDescription, String? cancelButton, String? okButton) async {
+  Future<bool?> _showAlertDialog(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(alertTitle ?? 'Permissions required'),
-        content: Text(alertDescription ??
-            'This application needs to access your phone accounts'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () =>
-                Navigator.of(context, rootNavigator: true).pop(false),
-            child: Text(cancelButton ?? 'Cancel'),
-          ),
-          TextButton(
-            onPressed: () =>
-                Navigator.of(context, rootNavigator: true).pop(true),
-            child: Text(okButton ?? 'ok'),
-          ),
-        ],
-      ),
+      builder: (BuildContext context) =>
+          _dialogWidget != null ? _dialogWidget! : Container(),
     );
   }
 

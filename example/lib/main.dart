@@ -263,19 +263,7 @@ class _MyAppState extends State<HomePage> {
     print('Display incoming call now');
     final bool hasPhoneAccount = await _callKeep.hasPhoneAccount();
     if (!hasPhoneAccount) {
-      await _callKeep.hasDefaultPhoneAccount(context, <String, dynamic>{
-        'alertTitle': 'Permissions required',
-        'alertDescription':
-            'This application needs to access your phone accounts',
-        'cancelButton': 'Cancel',
-        'okButton': 'ok',
-        'foregroundService': {
-          'channelId': 'com.company.my',
-          'channelName': 'Foreground service for my app',
-          'notificationTitle': 'My app is running on background',
-          'notificationIcon': 'Path to the resource icon of the notification',
-        },
-      });
+      await _callKeep.hasDefaultPhoneAccount(context);
     }
 
     print('[displayIncomingCall] $callUUID number: $number');
