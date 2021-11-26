@@ -593,7 +593,7 @@ public class CallKeepModule {
         String appName = this.getApplicationName(this.getAppContext());
 
         PhoneAccount.Builder builder = new PhoneAccount.Builder(handle, appName)
-                .setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED);
+                .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER);
 
         if (_settings != null && _settings.hasKey("imageName")) {
             int identifier = appContext.getResources().getIdentifier(_settings.getString("imageName"), "drawable", appContext.getPackageName());
