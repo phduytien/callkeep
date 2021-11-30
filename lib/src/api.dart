@@ -29,7 +29,7 @@ class FlutterCallkeep extends EventManager {
     BuildContext? context,
     Map<String, dynamic> options, {
     Widget? dialogWidget,
-    bool backgroundMode = false
+    bool backgroundMode = false,
   }) async {
     _context = context;
     _dialogWidget = dialogWidget;
@@ -45,15 +45,20 @@ class FlutterCallkeep extends EventManager {
     if (isIOS) {
       return;
     }
-    return _channel
-        .invokeMethod<void>('registerPhoneAccount', <String, dynamic>{});
+    return _channel.invokeMethod<void>(
+      'registerPhoneAccount',
+      <String, dynamic>{},
+    );
   }
 
   Future<void> registerAndroidEvents() async {
     if (isIOS) {
       return;
     }
-    return _channel.invokeMethod<void>('registerEvents', <String, dynamic>{});
+    return _channel.invokeMethod<void>(
+      'registerEvents',
+      <String, dynamic>{},
+    );
   }
 
   Future<bool> hasDefaultPhoneAccount(BuildContext context) async {
@@ -67,8 +72,10 @@ class FlutterCallkeep extends EventManager {
   }
 
   Future<bool?> _checkDefaultPhoneAccount() async {
-    return await _channel
-        .invokeMethod<bool>('checkDefaultPhoneAccount', <String, dynamic>{});
+    return await _channel.invokeMethod<bool>(
+      'checkDefaultPhoneAccount',
+      <String, dynamic>{},
+    );
   }
 
   Future<bool> _hasDefaultPhoneAccount() async {
@@ -106,7 +113,9 @@ class FlutterCallkeep extends EventManager {
   Future<void> answerIncomingCall(String uuid) async {
     if (!isIOS) {
       await _channel.invokeMethod<void>(
-          'answerIncomingCall', <String, dynamic>{'uuid': uuid});
+        'answerIncomingCall',
+        <String, dynamic>{'uuid': uuid},
+      );
     }
   }
 
@@ -132,22 +141,28 @@ class FlutterCallkeep extends EventManager {
   Future<void> reportConnectingOutgoingCallWithUUID(String uuid) async {
     //only available on iOS
     if (isIOS) {
-      await _channel.invokeMethod<void>('reportConnectingOutgoingCallWithUUID',
-          <String, dynamic>{'uuid': uuid});
+      await _channel.invokeMethod<void>(
+        'reportConnectingOutgoingCallWithUUID',
+        <String, dynamic>{'uuid': uuid},
+      );
     }
   }
 
   Future<void> reportConnectedOutgoingCallWithUUID(String uuid) async {
     //only available on iOS
     if (isIOS) {
-      await _channel.invokeMethod<void>('reportConnectedOutgoingCallWithUUID',
-          <String, dynamic>{'uuid': uuid});
+      await _channel.invokeMethod<void>(
+        'reportConnectedOutgoingCallWithUUID',
+        <String, dynamic>{'uuid': uuid},
+      );
     }
   }
 
   Future<void> reportEndCallWithUUID(String uuid, int reason) async =>
-      await _channel.invokeMethod<void>('reportEndCallWithUUID',
-          <String, dynamic>{'uuid': uuid, 'reason': reason});
+      await _channel.invokeMethod<void>(
+        'reportEndCallWithUUID',
+        <String, dynamic>{'uuid': uuid, 'reason': reason},
+      );
 
   /*
    * Android explicitly states we reject a call
@@ -155,17 +170,23 @@ class FlutterCallkeep extends EventManager {
    */
   Future<void> rejectCall(String uuid) async {
     if (!isIOS) {
-      await _channel
-          .invokeMethod<void>('rejectCall', <String, dynamic>{'uuid': uuid});
+      await _channel.invokeMethod<void>(
+        'rejectCall',
+        <String, dynamic>{'uuid': uuid},
+      );
     } else {
-      await _channel
-          .invokeMethod<void>('endCall', <String, dynamic>{'uuid': uuid});
+      await _channel.invokeMethod<void>(
+        'endCall',
+        <String, dynamic>{'uuid': uuid},
+      );
     }
   }
 
   Future<bool> isCallActive(String uuid) async {
-    var resp = await _channel
-        .invokeMethod<bool>('isCallActive', <String, dynamic>{'uuid': uuid});
+    var resp = await _channel.invokeMethod<bool>(
+      'isCallActive',
+      <String, dynamic>{'uuid': uuid},
+    );
     if (resp != null) {
       return resp;
     }
@@ -182,8 +203,10 @@ class FlutterCallkeep extends EventManager {
     if (isIOS) {
       return true;
     }
-    var resp = await _channel
-        .invokeMethod<bool>('hasPhoneAccount', <String, dynamic>{});
+    var resp = await _channel.invokeMethod<bool>(
+      'hasPhoneAccount',
+      <String, dynamic>{},
+    );
     if (resp != null) {
       return resp;
     }
@@ -194,8 +217,10 @@ class FlutterCallkeep extends EventManager {
     if (isIOS) {
       return true;
     }
-    var resp = await _channel
-        .invokeMethod<bool>('hasOutgoingCall', <String, dynamic>{});
+    var resp = await _channel.invokeMethod<bool>(
+      'hasOutgoingCall',
+      <String, dynamic>{},
+    );
     if (resp != null) {
       return resp;
     }
@@ -305,11 +330,9 @@ class FlutterCallkeep extends EventManager {
 
     final additionalPermissions = options['additionalPermissions'] ?? [];
     final showAccountAlert = await _checkPhoneAccountPermission(
-        options['additionalPermissions'] as List<String>);
+      additionalPermissions.cast<String>() as List<String>,
+    );
     final shouldOpenAccounts = await _alert(showAccountAlert);
-        additionalPermissions.cast<String>() as List<String>);
-    final shouldOpenAccounts = await _alert(showAccountAlert);
-
     if (shouldOpenAccounts) {
       await _openPhoneAccounts();
       return true;
