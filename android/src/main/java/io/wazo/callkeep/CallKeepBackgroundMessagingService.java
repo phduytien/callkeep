@@ -28,36 +28,38 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 public class CallKeepBackgroundMessagingService extends Service {
-  private static final String TAG = "FLT:CallKeepService";
-  private static @Nullable PowerManager.WakeLock sWakeLock;
-  /**
-   * Acquire a wake lock to ensure the device doesn't go to sleep while processing background tasks.
-   */
-  @SuppressLint("WakelockTimeout")
-  public static void acquireWakeLockNow(Context context) {
-    if (sWakeLock == null || !sWakeLock.isHeld()) {
-      PowerManager powerManager = (PowerManager) context.getSystemService(POWER_SERVICE);
-      sWakeLock =
-              powerManager.newWakeLock(
-                      PowerManager.PARTIAL_WAKE_LOCK, CallKeepBackgroundMessagingService.class.getCanonicalName());
-      sWakeLock.setReferenceCounted(false);
-      sWakeLock.acquire();
-    }
-  }
+    private static final String TAG = "FLT:CallKeepService";
+    private static @Nullable
+    PowerManager.WakeLock sWakeLock;
 
-  @Nullable
-  @Override
-  public IBinder onBind(Intent intent) {
-    Log.d(TAG, "wakeUpApplication: " + intent.getStringExtra("callUUID") + ", number : " + intent.getStringExtra("handle") + ", displayName:" + intent.getStringExtra("name"));
-    //TODO: not implemented
-    return null;
-  }
-
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-    if (sWakeLock != null) {
-      sWakeLock.release();
+    /**
+     * Acquire a wake lock to ensure the device doesn't go to sleep while processing background tasks.
+     */
+    @SuppressLint("WakelockTimeout")
+    public static void acquireWakeLockNow(Context context) {
+        if (sWakeLock == null || !sWakeLock.isHeld()) {
+            PowerManager powerManager = (PowerManager) context.getSystemService(POWER_SERVICE);
+            sWakeLock =
+                    powerManager.newWakeLock(
+                            PowerManager.PARTIAL_WAKE_LOCK, CallKeepBackgroundMessagingService.class.getCanonicalName());
+            sWakeLock.setReferenceCounted(false);
+            sWakeLock.acquire();
+        }
     }
-  }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG, "wakeUpApplication: " + intent.getStringExtra("callUUID") + ", number : " + intent.getStringExtra("handle") + ", displayName:" + intent.getStringExtra("name"));
+        //TODO: not implemented
+        return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (sWakeLock != null) {
+            sWakeLock.release();
+        }
+    }
 }
