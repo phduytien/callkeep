@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="incoming_call">Incoming Call</string>
+    <string name="doctor_name">Bác Sĩ SmartCare</string>
+    <string name="phone_number">012345678910</string>
+    <string name="decline">Decline</string>
+    <string name="answer">Answer</string>
+
+</resources>

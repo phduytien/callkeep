@@ -17,6 +17,9 @@
 
 package io.wazo.callkeep;
 
+import static io.wazo.callkeep.Constants.*;
+import static io.wazo.callkeep.NotificationManagerKt.showCallNotification;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -53,19 +56,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugin.common.EventChannel;
-import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.wazo.callkeep.utils.Callback;
-import io.wazo.callkeep.utils.ConstraintsMap;
 import io.wazo.callkeep.utils.ConstraintsArray;
+import io.wazo.callkeep.utils.ConstraintsMap;
 import io.wazo.callkeep.utils.PermissionUtils;
-
-import static io.wazo.callkeep.Constants.*;
-import static io.wazo.callkeep.NotificationManagerKt.showCallNotification;
 
 // @see https://github.com/kbagchiGWC/voice-quickstart-android/blob/9a2aff7fbe0d0a5ae9457b48e9ad408740dfb968/exampleConnectionService/src/main/java/com/twilio/voice/examples/connectionservice/VoiceConnectionServiceActivity.java
 public class CallKeepModule {
@@ -220,7 +218,7 @@ public class CallKeepModule {
 
         return true;
     }
-    
+
     public void setup(ConstraintsMap options) {
         if (isReceiverRegistered) {
             return;
@@ -235,7 +233,7 @@ public class CallKeepModule {
 
         VoiceConnectionService.setSettings(options);
     }
-    
+
     public void registerPhoneAccount() {
         if (!isConnectionServiceAvailable()) {
             return;
@@ -244,7 +242,7 @@ public class CallKeepModule {
         this.registerPhoneAccount(this.getAppContext());
     }
 
-    
+
     public void registerEvents() {
         if (!isConnectionServiceAvailable()) {
             return;
@@ -254,19 +252,16 @@ public class CallKeepModule {
         VoiceConnectionService.setPhoneAccountHandle(handle);
     }
 
-    
+
     public void displayIncomingCall(String uuid, String number, String callerName) {
-//        Log.i("displayIncomingCall", "displayIncomingCall");
-//        showCallNotification(
-//                _context,
-//                uuid,
-//                1,
-//                1,
-//                "callInitiatorName",
-//                new ArrayList<Integer>(),
-//                "userInfo"
-//        );
-//        if(true) return;
+        Log.i("displayIncomingCall", "displayIncomingCall");
+        showCallNotification(
+                _context,
+                uuid,
+                callerName,
+                number
+        );
+        if(true) return;
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }
@@ -274,7 +269,7 @@ public class CallKeepModule {
         Log.d(TAG, "displayIncomingCall number: " + number + ", callerName: " + callerName);
 
         Bundle extras = new Bundle();
-        
+
         Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);
         extras.putParcelable(TelecomManager.EXTRA_INCOMING_CALL_ADDRESS, uri);
         extras.putString(EXTRA_CALLER_NAME, callerName);
@@ -283,7 +278,7 @@ public class CallKeepModule {
         telecomManager.addNewIncomingCall(handle, extras);
     }
 
-    
+
     public void answerIncomingCall(String uuid) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
@@ -297,7 +292,7 @@ public class CallKeepModule {
         conn.onAnswer();
     }
 
-    
+
     public void startCall(String uuid, String number, String callerName) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount() || !hasPermissions() || number == null) {
             return;
@@ -319,9 +314,10 @@ public class CallKeepModule {
         telecomManager.placeCall(uri, extras);
     }
 
-    
+
     public void endCall(String uuid) {
         Log.d(TAG, "endCall called");
+        NotificationManagerKt.cancelCallNotification(_context,uuid);
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }
@@ -335,7 +331,7 @@ public class CallKeepModule {
         Log.d(TAG, "endCall executed");
     }
 
-    
+
     public void endAllCalls() {
         Log.d(TAG, "endAllCalls called");
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
@@ -351,7 +347,7 @@ public class CallKeepModule {
         Log.d(TAG, "endAllCalls executed");
     }
 
-    
+
     public void checkPhoneAccountPermission(ConstraintsArray optionalPermissions, @NonNull MethodChannel.Result result) {
         if (!isConnectionServiceAvailable()) {
             result.error(E_ACTIVITY_DOES_NOT_EXIST, "ConnectionService not available for this version of Android.", null);
@@ -394,7 +390,7 @@ public class CallKeepModule {
         result.success(!hasPhoneAccount());
     }
 
-    
+
     public void checkDefaultPhoneAccount(@NonNull MethodChannel.Result result) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             result.success(true);
@@ -412,7 +408,7 @@ public class CallKeepModule {
         result.success(!hasSim || hasDefaultAccount);
     }
 
-    
+
     public void setOnHold(String uuid, boolean shouldHold) {
         Connection conn = VoiceConnectionService.getConnection(uuid);
         if (conn == null) {
@@ -426,7 +422,7 @@ public class CallKeepModule {
         }
     }
 
-    
+
     public void reportEndCallWithUUID(String uuid, int reason) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
@@ -439,7 +435,7 @@ public class CallKeepModule {
         conn.reportDisconnect(reason);
     }
 
-    
+
     public void rejectCall(String uuid) {
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
@@ -453,7 +449,7 @@ public class CallKeepModule {
         conn.onReject();
     }
 
-    
+
     public void setMutedCall(String uuid, boolean shouldMute) {
         Connection conn = VoiceConnectionService.getConnection(uuid);
         if (conn == null) {
@@ -472,7 +468,7 @@ public class CallKeepModule {
         conn.onCallAudioStateChanged(newAudioState);
     }
 
-    
+
     public void sendDTMF(String uuid, String key) {
         Connection conn = VoiceConnectionService.getConnection(uuid);
         if (conn == null) {
@@ -482,7 +478,7 @@ public class CallKeepModule {
         conn.onPlayDtmfTone(dtmf);
     }
 
-    
+
     public void updateDisplay(String uuid, String displayName, String uri) {
         Connection conn = VoiceConnectionService.getConnection(uuid);
         if (conn == null) {
@@ -493,7 +489,7 @@ public class CallKeepModule {
         conn.setCallerDisplayName(displayName, TelecomManager.PRESENTATION_ALLOWED);
     }
 
-    
+
     public void hasPhoneAccount(@NonNull MethodChannel.Result result) {
         if (telecomManager == null) {
             this.initializeTelecomManager();
@@ -502,27 +498,27 @@ public class CallKeepModule {
         result.success(hasPhoneAccount());
     }
 
-    
+
     public void hasOutgoingCall(@NonNull MethodChannel.Result result) {
         result.success(VoiceConnectionService.hasOutgoingCall);
     }
 
-    
+
     public void hasPermissions(@NonNull MethodChannel.Result result) {
         result.success(this.hasPermissions());
     }
 
-    
+
     public void setAvailable(Boolean active) {
         VoiceConnectionService.setAvailable(active);
     }
 
-    
+
     public void setReachable() {
         VoiceConnectionService.setReachable();
     }
 
-    
+
     public void setCurrentCallActive(String uuid) {
         Connection conn = VoiceConnectionService.getConnection(uuid);
         if (conn == null) {
@@ -533,7 +529,7 @@ public class CallKeepModule {
         conn.setActive();
     }
 
-    
+
     public void openPhoneAccounts(@NonNull MethodChannel.Result result) {
         if (!isConnectionServiceAvailable()) {
             result.error("ConnectionServiceNotAvailable", null, null);
@@ -555,13 +551,13 @@ public class CallKeepModule {
         this._currentActivity.startActivity(intent);
         result.success(null);
     }
-    
+
     public static Boolean isConnectionServiceAvailable() {
         // PhoneAccount is available since api level 23
         return Build.VERSION.SDK_INT >= 23;
     }
 
-    
+
     @SuppressLint("WrongConstant")
     public void backToForeground(@NonNull MethodChannel.Result result) {
         Context context = getAppContext();

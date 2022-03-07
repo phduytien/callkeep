@@ -42,35 +42,12 @@ class EventReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent == null || TextUtils.isEmpty(intent.action)) return
         when (intent.action) {
-            ACTION_CALL_REJECT -> {
+            Constants.ACTION_CALL_REJECT -> {
 
                 val extras = intent.extras
-                val callId = extras?.getString(EXTRA_CALL_ID)
-                val callType = extras?.getInt(EXTRA_CALL_TYPE)
-                val callInitiatorId = extras?.getInt(EXTRA_CALL_INITIATOR_ID)
-                val callInitiatorName = extras?.getString(EXTRA_CALL_INITIATOR_NAME)
-                val callOpponents = extras?.getIntegerArrayList(EXTRA_CALL_OPPONENTS)
-                val userInfo = extras?.getString(EXTRA_CALL_USER_INFO)
-                Log.i(TAG, "NotificationReceiver onReceive Call REJECT, callId: $callId")
-
-                val broadcastIntent = Intent(ACTION_CALL_REJECT)
+                val callId = extras?.getString(Constants.EXTRA_CALL_UUID)
                 val bundle = Bundle()
-                bundle.putString(EXTRA_CALL_ID, callId)
                 bundle.putString(Constants.EXTRA_CALL_UUID, callId)
-                bundle.putInt(EXTRA_CALL_TYPE, callType!!)
-                bundle.putInt(EXTRA_CALL_INITIATOR_ID, callInitiatorId!!)
-                bundle.putString(EXTRA_CALL_INITIATOR_NAME, callInitiatorName)
-                bundle.putIntegerArrayList(EXTRA_CALL_OPPONENTS, callOpponents)
-                bundle.putString(EXTRA_CALL_USER_INFO, userInfo)
-//                broadcastIntent.putExtras(bundle)
-//
-//                LocalBroadcastManager.getInstance(context.applicationContext)
-//                    .sendBroadcast(broadcastIntent)
-
-
-                bundle.putString(Constants.EXTRA_CALL_UUID, callId)
-                bundle.putString(Constants.EXTRA_CALLER_NAME, callInitiatorName)
-                bundle.putString(Constants.EXTRA_CALL_NUMBER, userInfo)
                 sendCallRequestToActivity(
                     Constants.ACTION_END_CALL,
                     context = context,
@@ -80,34 +57,19 @@ class EventReceiver : BroadcastReceiver() {
                 NotificationManagerCompat.from(context).cancel(callId.hashCode())
             }
 
-            ACTION_CALL_ACCEPT -> {
+            Constants.ACTION_CALL_ACCEPT -> {
 
                 val extras = intent.extras
-                val callId = extras?.getString(EXTRA_CALL_ID)
-                val callType = extras?.getInt(EXTRA_CALL_TYPE)
-                val callInitiatorId = extras?.getInt(EXTRA_CALL_INITIATOR_ID)
-                val callInitiatorName = extras?.getString(EXTRA_CALL_INITIATOR_NAME)
-                val callOpponents = extras?.getIntegerArrayList(EXTRA_CALL_OPPONENTS)
-                val userInfo = extras?.getString(EXTRA_CALL_USER_INFO)
+                val callId = extras?.getString(Constants.EXTRA_CALL_UUID)
+                val number = extras?.getString(Constants.EXTRA_CALL_NUMBER)
+                val callInitiatorName = extras?.getString(Constants.EXTRA_CALLER_NAME)
                 Log.i(TAG, "NotificationReceiver onReceive Call ACCEPT, callId: $callId")
 
-                val broadcastIntent = Intent(ACTION_CALL_ACCEPT)
                 val bundle = Bundle()
-                bundle.putString(EXTRA_CALL_ID, callId)
-                bundle.putString(Constants.EXTRA_CALL_UUID, callId)
-                bundle.putInt(EXTRA_CALL_TYPE, callType!!)
-                bundle.putInt(EXTRA_CALL_INITIATOR_ID, callInitiatorId!!)
-                bundle.putString(EXTRA_CALL_INITIATOR_NAME, callInitiatorName)
-                bundle.putIntegerArrayList(EXTRA_CALL_OPPONENTS, callOpponents)
-                bundle.putString(EXTRA_CALL_USER_INFO, userInfo)
-//                broadcastIntent.putExtras(bundle)
-//
-//                LocalBroadcastManager.getInstance(context.applicationContext)
-//                    .sendBroadcast(broadcastIntent)
+
                 bundle.putString(Constants.EXTRA_CALL_UUID, callId)
                 bundle.putString(Constants.EXTRA_CALLER_NAME, callInitiatorName)
-                bundle.putString(Constants.EXTRA_CALL_NUMBER, userInfo)
-
+                bundle.putString(Constants.EXTRA_CALL_NUMBER, number)
                 sendCallRequestToActivity(
                     Constants.ACTION_ANSWER_CALL,
                     context = context,
@@ -118,25 +80,24 @@ class EventReceiver : BroadcastReceiver() {
                     context = context,
                     attributeMap = bundleToMap(bundle)
                 )
-
                 NotificationManagerCompat.from(context).cancel(callId.hashCode())
+                val activityClass = Class.forName("net.vinbrain.smartcare.MainActivity")
+                val intent = Intent(context, activityClass)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
             }
 
-            ACTION_CALL_NOTIFICATION_CANCELED -> {
+            Constants.ACTION_CALL_NOTIFICATION_CANCELED -> {
                 val extras = intent.extras
-                val callId = extras?.getString(EXTRA_CALL_ID)
-                val callType = extras?.getInt(EXTRA_CALL_TYPE)
-                val callInitiatorId = extras?.getInt(EXTRA_CALL_INITIATOR_ID)
-                val callInitiatorName = extras?.getString(EXTRA_CALL_INITIATOR_NAME)
-                val userInfo = extras?.getString(EXTRA_CALL_USER_INFO)
+                val callId = extras?.getString(Constants.EXTRA_CALL_UUID)
                 Log.i(
                     TAG,
                     "NotificationReceiver onReceive Delete Call Notification, callId: $callId"
                 )
                 LocalBroadcastManager.getInstance(context.applicationContext)
                     .sendBroadcast(
-                        Intent(ACTION_CALL_NOTIFICATION_CANCELED).putExtra(
-                            EXTRA_CALL_ID,
+                        Intent(Constants.ACTION_CALL_NOTIFICATION_CANCELED).putExtra(
+                            Constants.EXTRA_CALL_UUID,
                             callId
                         )
                     )
