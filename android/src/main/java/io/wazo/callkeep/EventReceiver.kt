@@ -83,6 +83,7 @@ class EventReceiver : BroadcastReceiver() {
                 NotificationManagerCompat.from(context).cancel(callId.hashCode())
                 val activityClass = Class.forName("net.vinbrain.smartcare.MainActivity")
                 val intent = Intent(context, activityClass)
+                intent.putExtras(bundle)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 context.startActivity(intent)
             }
