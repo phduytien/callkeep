@@ -72,8 +72,8 @@ public class CallKeepModule {
 
     private static final String E_ACTIVITY_DOES_NOT_EXIST = "E_ACTIVITY_DOES_NOT_EXIST";
     private static final String REACT_NATIVE_MODULE_NAME = "CallKeep";
-    private static final String[] permissions = { Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.CALL_PHONE, Manifest.permission.RECORD_AUDIO };
+    private static final String[] permissions = {Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.CALL_PHONE, Manifest.permission.RECORD_AUDIO};
 
     private static final String TAG = "FLT:CallKeepModule";
     private static TelecomManager telecomManager;
@@ -95,7 +95,7 @@ public class CallKeepModule {
         this._currentActivity = activity;
     }
 
-    public void dispose(){
+    public void dispose() {
         if (voiceBroadcastReceiver == null || this._context == null) return;
         LocalBroadcastManager.getInstance(this._context).unregisterReceiver(voiceBroadcastReceiver);
         VoiceConnectionService.setPhoneAccountHandle(null);
@@ -103,29 +103,30 @@ public class CallKeepModule {
     }
 
     public boolean handleMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        switch(call.method) {
+        switch (call.method) {
             case "setup": {
-                setup(new ConstraintsMap((Map<String, Object>)call.argument("options")));
+                setup(new ConstraintsMap((Map<String, Object>) call.argument("options")));
                 result.success(null);
             }
             break;
             case "displayIncomingCall": {
-                displayIncomingCall((String)call.argument("uuid"), (String)call.argument("handle"), (String)call.argument("localizedCallerName"));
+                displayIncomingCall((String) call.argument("uuid"), (String) call.argument("handle"), (String) call.argument("localizedCallerName"));
                 result.success(null);
             }
             break;
             case "answerIncomingCall": {
-                answerIncomingCall((String)call.argument("uuid"));
+                String uuid = (String) call.argument("uuid");
+                answerIncomingCall(uuid);
                 result.success(null);
             }
             break;
             case "startCall": {
-                startCall((String)call.argument("uuid"), (String)call.argument("number"), (String)call.argument("callerName"));
+                startCall((String) call.argument("uuid"), (String) call.argument("number"), (String) call.argument("callerName"));
                 result.success(null);
             }
             break;
             case "endCall": {
-                endCall((String)call.argument("uuid"));
+                endCall((String) call.argument("uuid"));
                 result.success(null);
             }
             break;
@@ -135,7 +136,7 @@ public class CallKeepModule {
             }
             break;
             case "checkPhoneAccountPermission": {
-                checkPhoneAccountPermission(new ConstraintsArray((ArrayList<Object>)call.argument("optionalPermissions")), result);
+                checkPhoneAccountPermission(new ConstraintsArray((ArrayList<Object>) call.argument("optionalPermissions")), result);
             }
             break;
             case "checkDefaultPhoneAccount": {
@@ -143,32 +144,32 @@ public class CallKeepModule {
             }
             break;
             case "setOnHold": {
-                setOnHold((String)call.argument("uuid"), (Boolean) call.argument("hold"));
+                setOnHold((String) call.argument("uuid"), (Boolean) call.argument("hold"));
                 result.success(null);
             }
             break;
             case "reportEndCallWithUUID": {
-                reportEndCallWithUUID((String)call.argument("uuid"), (int)call.argument("reason"));
+                reportEndCallWithUUID((String) call.argument("uuid"), (int) call.argument("reason"));
                 result.success(null);
             }
             break;
             case "rejectCall": {
-                rejectCall((String)call.argument("uuid"));
+                rejectCall((String) call.argument("uuid"));
                 result.success(null);
             }
             break;
             case "setMutedCall": {
-                setMutedCall((String)call.argument("uuid"), (Boolean)call.argument("muted"));
+                setMutedCall((String) call.argument("uuid"), (Boolean) call.argument("muted"));
                 result.success(null);
             }
             break;
             case "sendDTMF": {
-                sendDTMF((String)call.argument("uuid"), (String)call.argument("key"));
+                sendDTMF((String) call.argument("uuid"), (String) call.argument("key"));
                 result.success(null);
             }
             break;
             case "updateDisplay": {
-                updateDisplay((String)call.argument("uuid"), (String)call.argument("displayName"), (String)call.argument("handle"));
+                updateDisplay((String) call.argument("uuid"), (String) call.argument("displayName"), (String) call.argument("handle"));
                 result.success(null);
             }
             break;
@@ -195,7 +196,7 @@ public class CallKeepModule {
             }
             break;
             case "setCurrentCallActive": {
-                setCurrentCallActive((String)call.argument("uuid"));
+                setCurrentCallActive((String) call.argument("uuid"));
                 result.success(null);
             }
             break;
@@ -208,7 +209,24 @@ public class CallKeepModule {
             }
             break;
             case "foregroundService": {
-                VoiceConnectionService.setSettings(new ConstraintsMap((Map<String, Object>)call.argument("settings")));
+                VoiceConnectionService.setSettings(new ConstraintsMap((Map<String, Object>) call.argument("settings")));
+                result.success(null);
+            }
+            case "currentCallUuid": {
+                Activity activity = _context instanceof Activity ? (Activity) _context : _currentActivity;
+                if (activity != null) {
+                    Intent intent = activity.getIntent();
+                    if (intent != null) {
+                        Bundle extras = intent.getExtras();
+                        if (extras != null) {
+                            String uuid = extras.getString(EXTRA_CALL_UUID);
+                            if (uuid != null) {
+                                result.success(uuid);
+                                return true;
+                            }
+                        }
+                    }
+                }
                 result.success(null);
             }
             break;
@@ -261,7 +279,7 @@ public class CallKeepModule {
                 callerName,
                 number
         );
-        if(true) return;
+        if (true) return;
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }
@@ -317,7 +335,7 @@ public class CallKeepModule {
 
     public void endCall(String uuid) {
         Log.d(TAG, "endCall called");
-        NotificationManagerKt.cancelCallNotification(_context,uuid);
+        NotificationManagerKt.cancelCallNotification(_context, uuid);
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }
@@ -384,7 +402,7 @@ public class CallKeepModule {
                             result.success(false);
                         }
                     });
-             return;
+            return;
         }
 
         result.success(!hasPhoneAccount());
@@ -540,7 +558,7 @@ public class CallKeepModule {
             Intent intent = new Intent();
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             intent.setComponent(new ComponentName("com.android.server.telecom",
-                     "com.android.server.telecom.settings.EnableAccountPreferenceActivity"));
+                    "com.android.server.telecom.settings.EnableAccountPreferenceActivity"));
             this._currentActivity.startActivity(intent);
             result.success(null);
             return;
@@ -641,7 +659,7 @@ public class CallKeepModule {
 
     private static boolean hasPhoneAccount() {
         return isConnectionServiceAvailable() && telecomManager != null
-            && telecomManager.getPhoneAccount(handle) != null && telecomManager.getPhoneAccount(handle).isEnabled();
+                && telecomManager.getPhoneAccount(handle) != null && telecomManager.getPhoneAccount(handle).isEnabled();
     }
 
     private void registerReceiver() {
@@ -673,32 +691,32 @@ public class CallKeepModule {
             final Callback successCallback,
             final Callback errorCallback) {
         PermissionUtils.Callback callback = (permissions_, grantResults) -> {
-                    List<String> grantedPermissions = new ArrayList<>();
-                    List<String> deniedPermissions = new ArrayList<>();
+            List<String> grantedPermissions = new ArrayList<>();
+            List<String> deniedPermissions = new ArrayList<>();
 
-                    for (int i = 0; i < permissions_.length; ++i) {
-                        String permission = permissions_[i];
-                        int grantResult = grantResults[i];
+            for (int i = 0; i < permissions_.length; ++i) {
+                String permission = permissions_[i];
+                int grantResult = grantResults[i];
 
-                        if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                            grantedPermissions.add(permission);
-                        } else {
-                            deniedPermissions.add(permission);
-                        }
-                    }
+                if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                    grantedPermissions.add(permission);
+                } else {
+                    deniedPermissions.add(permission);
+                }
+            }
 
-                    // Success means that all requested permissions were granted.
-                    for (String p : permissions) {
-                        if (!grantedPermissions.contains(p)) {
-                            // According to step 6 of the getUserMedia() algorithm
-                            // "if the result is denied, jump to the step Permission
-                            // Failure."
-                            errorCallback.invoke(deniedPermissions);
-                            return;
-                        }
-                    }
-                    successCallback.invoke(grantedPermissions);
-                };
+            // Success means that all requested permissions were granted.
+            for (String p : permissions) {
+                if (!grantedPermissions.contains(p)) {
+                    // According to step 6 of the getUserMedia() algorithm
+                    // "if the result is denied, jump to the step Permission
+                    // Failure."
+                    errorCallback.invoke(deniedPermissions);
+                    return;
+                }
+            }
+            successCallback.invoke(grantedPermissions);
+        };
 
         final Activity activity = _currentActivity;
         if (activity != null) {
@@ -711,7 +729,7 @@ public class CallKeepModule {
         @Override
         public void onReceive(Context context, Intent intent) {
             ConstraintsMap args = new ConstraintsMap();
-            HashMap<String, String> attributeMap = (HashMap<String, String>)intent.getSerializableExtra("attributeMap");
+            HashMap<String, String> attributeMap = (HashMap<String, String>) intent.getSerializableExtra("attributeMap");
 
             switch (intent.getAction()) {
                 case ACTION_END_CALL:

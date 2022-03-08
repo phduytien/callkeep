@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart'
     show BuildContext, Widget, showDialog, Container;
 import 'package:flutter/services.dart';
@@ -9,6 +10,7 @@ import 'actions.dart';
 import 'event.dart';
 
 bool get isIOS => Platform.isIOS;
+
 bool get supportConnectionService =>
     !isIOS && int.parse(Platform.version) >= 23;
 
@@ -16,9 +18,11 @@ class FlutterCallkeep extends EventManager {
   factory FlutterCallkeep() {
     return _instance;
   }
+
   FlutterCallkeep._internal() {
     _event.setMethodCallHandler(eventListener);
   }
+
   static final FlutterCallkeep _instance = FlutterCallkeep._internal();
   static const MethodChannel _channel = MethodChannel('FlutterCallKeep.Method');
   static const MethodChannel _event = MethodChannel('FlutterCallKeep.Event');
@@ -186,6 +190,18 @@ class FlutterCallkeep extends EventManager {
       return resp;
     }
     return false;
+  }
+
+  FutureOr<String?> currentCallUuid() async {
+    if (isIOS) {
+      return null;
+    }
+    var resp = await _channel
+        .invokeMethod<String>('currentCallUuid', <String, dynamic>{});
+    if (resp != null) {
+      return resp;
+    }
+    return null;
   }
 
   Future<bool> hasOutgoingCall() async {
