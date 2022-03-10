@@ -241,15 +241,7 @@ public class CallKeepModule {
         if (isReceiverRegistered) {
             return;
         }
-        VoiceConnectionService.setAvailable(false);
-        this._settings = options;
-        if (isConnectionServiceAvailable()) {
-            this.registerPhoneAccount();
-            this.registerEvents();
-            VoiceConnectionService.setAvailable(true);
-        }
-
-        VoiceConnectionService.setSettings(options);
+        this.registerEvents();
     }
 
     public void registerPhoneAccount() {
@@ -571,8 +563,10 @@ public class CallKeepModule {
     }
 
     public static Boolean isConnectionServiceAvailable() {
-        // PhoneAccount is available since api level 23
-        return Build.VERSION.SDK_INT >= 23;
+
+        // Nam: true because we do not use call system anymore
+
+        return true ;
     }
 
 

@@ -60,17 +60,11 @@ class FlutterCallkeep extends EventManager {
 
   Future<bool> hasDefaultPhoneAccount(BuildContext context) async {
     _context = context;
-    if (!isIOS) {
-      return await _hasDefaultPhoneAccount();
-    }
-
-    // return true on iOS because we don't want to block the endUser
     return true;
   }
 
   Future<bool?> _checkDefaultPhoneAccount() async {
-    return await _channel
-        .invokeMethod<bool>('checkDefaultPhoneAccount', <String, dynamic>{});
+    return true;
   }
 
   Future<bool> _hasDefaultPhoneAccount() async {

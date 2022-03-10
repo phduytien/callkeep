@@ -33,7 +33,7 @@ fun showCallNotification(
 ) {
     val notificationManager = NotificationManagerCompat.from(context)
 
-    val intent = getLaunchIntent(context)
+    val intent = createStartIncomingScreenIntent(context,uuid,name,phoneNumber)
 
     val pendingIntent = PendingIntent.getActivity(
         context,
@@ -55,28 +55,6 @@ fun showCallNotification(
     builder.setCustomBigContentView(notificationLayout)
     builder.setCustomHeadsUpContentView(notificationLayout)
 
-//    // Add actions
-//    addCallRejectAction(
-//        context,
-//        builder,
-//        callId,
-//        callType,
-//        callInitiatorId,
-//        callInitiatorName,
-//        callOpponents,
-//        userInfo
-//    )
-//    addCallAcceptAction(
-//        context,
-//        builder,
-//        callId,
-//        callType,
-//        callInitiatorId,
-//        callInitiatorName,
-//        callOpponents,
-//        userInfo
-//    )
-
     // Add full screen intent (to show on lock screen)
     addCallFullScreenIntent(
         context,
@@ -85,17 +63,6 @@ fun showCallNotification(
         name,
         phoneNumber
     )
-
-//    // Add action when delete call notification
-//    addCancelCallNotificationIntent(
-//        context,
-//        builder,
-//        callId,
-//        callType,
-//        callInitiatorId,
-//        callInitiatorName,
-//        userInfo
-//    )
 
     // Set small icon for notification
     setNotificationSmallIcon(context, builder)
@@ -146,22 +113,6 @@ fun buildRemoteView(
     return result
 }
 
-fun getLaunchIntent(context: Context): Intent? {
-    val activityClass = Class.forName("net.vinbrain.smartcare.IncomingCallActivity")
-    val intent = Intent(context, activityClass)
-
-    intent.apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-    }
-//
-//    intent.putExtra(EXTRA_CALL_ID, callId)
-//    intent.putExtra(EXTRA_CALL_TYPE, callType)
-//    intent.putExtra(EXTRA_CALL_INITIATOR_ID, callInitiatorId)
-//    intent.putExtra(EXTRA_CALL_INITIATOR_NAME, callInitiatorName)
-//    intent.putIntegerArrayListExtra(EXTRA_CALL_OPPONENTS, opponents)
-//    intent.putExtra(EXTRA_CALL_USER_INFO, userInfo)
-    return intent
-}
 
 fun createCallNotification(
     context: Context,
@@ -192,12 +143,10 @@ fun createStartIncomingScreenIntent(
     name: String,
     phoneNumber: String
 ): Intent {
-    val activityClass = Class.forName("net.vinbrain.smartcare.IncomingCallActivity")
-    val intent = Intent(context, activityClass)
+    val intent = Intent(context, IncomingCallActivity::class.java)
     intent.apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
-
     intent.putExtra(Constants.EXTRA_CALL_UUID, uuid)
     intent.putExtra(Constants.EXTRA_CALLER_NAME, name)
     intent.putExtra(Constants.EXTRA_CALL_NUMBER, phoneNumber)
