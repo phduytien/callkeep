@@ -110,8 +110,17 @@ public class CallKeepModule {
             }
             break;
             case "displayIncomingCall": {
-                displayIncomingCall((String) call.argument("uuid"), (String) call.argument("handle"), (String) call.argument("localizedCallerName"));
+                final String uuid = (String) call.argument("uuid");
+                final String handle = (String) call.argument("handle");
+                final String localizedCallerName = (String) call.argument("localizedCallerName");
+                displayIncomingCall(uuid, handle, localizedCallerName);
                 result.success(null);
+
+                final HashMap<String, Object> map = new HashMap<>();
+                map.put("uuid", uuid);
+                map.put("handle", handle);
+                map.put("localizedCallerName", localizedCallerName);
+                _eventChannel.invokeMethod("DisplayIncomingCallAction", map);
             }
             break;
             case "answerIncomingCall": {
@@ -566,7 +575,7 @@ public class CallKeepModule {
 
         // Nam: true because we do not use call system anymore
 
-        return true ;
+        return true;
     }
 
 

@@ -81,11 +81,12 @@ class EventReceiver : BroadcastReceiver() {
                     attributeMap = bundleToMap(bundle)
                 )
                 NotificationManagerCompat.from(context).cancel(callId.hashCode())
-                val activityClass = Class.forName("net.vinbrain.smartcare.MainActivity")
-                val intent = Intent(context, activityClass)
-                intent.putExtras(bundle)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
+                val packageName = context.applicationContext.packageName
+                context.packageManager.getLaunchIntentForPackage(packageName)?.cloneFilter()?.run {
+                    intent.putExtras(bundle)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(this)
+                }
             }
 
             Constants.ACTION_CALL_NOTIFICATION_CANCELED -> {

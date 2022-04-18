@@ -1,6 +1,7 @@
 package io.wazo.callkeep
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -37,8 +38,12 @@ class IncomingCallActivity : AppCompatActivity() {
                 Constants.ACTION_AUDIO_SESSION,
                 attributeMap = bundleToMap(bundle)
             )
-            val activityClass = Class.forName("net.vinbrain.smartcare.MainActivity")
-            val intent = Intent(this, activityClass).apply {
+            val context: Context = this.applicationContext
+            val packageName = context.packageName
+            val focusIntent =
+                context.packageManager.getLaunchIntentForPackage(packageName)?.cloneFilter()
+
+            val intent = focusIntent?.apply {
                 putExtras(bundle)
             }
             startActivity(intent)

@@ -2,6 +2,7 @@ import 'event.dart';
 
 class CallKeepDidReceiveStartCallAction extends EventType {
   CallKeepDidReceiveStartCallAction();
+
   CallKeepDidReceiveStartCallAction.fromMap(Map<dynamic, dynamic> arguments)
       : callUUID = arguments['callUUID'] as String,
         handle = arguments['handle'] as String,
@@ -13,13 +14,27 @@ class CallKeepDidReceiveStartCallAction extends EventType {
 
 class CallKeepPerformAnswerCallAction extends EventType {
   CallKeepPerformAnswerCallAction();
+
   CallKeepPerformAnswerCallAction.fromMap(Map<dynamic, dynamic> arguments)
       : callUUID = arguments['callUUID'] as String;
   String? callUUID;
 }
 
+class DisplayIncomingCallAction extends EventType {
+  DisplayIncomingCallAction();
+
+  DisplayIncomingCallAction.fromMap(Map<dynamic, dynamic> arguments)
+      : uuid = arguments['uuid'] as String,
+        localizedCallerName = arguments['localizedCallerName'] as String,
+        handle = arguments['handle'] as String;
+  String? uuid;
+  String? localizedCallerName;
+  String? handle;
+}
+
 class CallKeepPerformEndCallAction extends EventType {
   CallKeepPerformEndCallAction();
+
   CallKeepPerformEndCallAction.fromMap(Map<dynamic, dynamic> arguments)
       : callUUID = arguments['callUUID'] as String;
   String? callUUID;
@@ -35,6 +50,7 @@ class CallKeepDidDeactivateAudioSession extends EventType {
 
 class CallKeepDidDisplayIncomingCall extends EventType {
   CallKeepDidDisplayIncomingCall();
+
   CallKeepDidDisplayIncomingCall.fromMap(Map<dynamic, dynamic> arguments)
       : callUUID = arguments['callUUID'] as String,
         handle = arguments['handle'] as String,
@@ -50,6 +66,7 @@ class CallKeepDidDisplayIncomingCall extends EventType {
 
 class CallKeepDidPerformSetMutedCallAction extends EventType {
   CallKeepDidPerformSetMutedCallAction();
+
   CallKeepDidPerformSetMutedCallAction.fromMap(Map<dynamic, dynamic> arguments)
       : callUUID = arguments['callUUID'] as String,
         muted = arguments['muted'] as bool;
@@ -59,6 +76,7 @@ class CallKeepDidPerformSetMutedCallAction extends EventType {
 
 class CallKeepDidToggleHoldAction extends EventType {
   CallKeepDidToggleHoldAction();
+
   CallKeepDidToggleHoldAction.fromMap(Map<dynamic, dynamic> arguments)
       : callUUID = arguments['callUUID'] as String,
         hold = arguments['hold'] as bool;
@@ -68,6 +86,7 @@ class CallKeepDidToggleHoldAction extends EventType {
 
 class CallKeepDidPerformDTMFAction extends EventType {
   CallKeepDidPerformDTMFAction();
+
   CallKeepDidPerformDTMFAction.fromMap(Map<dynamic, dynamic> arguments)
       : callUUID = arguments['callUUID'] as String,
         digits = arguments['digits'] as String;
@@ -89,6 +108,7 @@ class CallKeepDidLoadWithEvents extends EventType {
 
 class CallKeepPushKitToken extends EventType {
   CallKeepPushKitToken();
+
   CallKeepPushKitToken.fromMap(Map<dynamic, dynamic> arguments)
       : token = arguments['token'] as String;
   String? token;
