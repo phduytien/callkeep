@@ -41,12 +41,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telecom.CallAudioState;
 import android.telecom.Connection;
 import android.telecom.PhoneAccount;
@@ -244,7 +246,12 @@ public class CallKeepModule {
                         if (extras != null) {
                             String uuid = extras.getString(EXTRA_CALL_UUID);
                             if (uuid != null) {
-                                result.success(uuid);
+//                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(_context);
+//                                final String key = "handled_"+uuid;
+//                                if(!sharedPreferences.getBoolean(key,false)){
+//                                    sharedPreferences.edit().putBoolean(key, true).apply();
+                                    result.success(uuid);
+//                                }
                                 return true;
                             }
                         }
