@@ -17,7 +17,20 @@
 
 package io.wazo.callkeep;
 
-import static io.wazo.callkeep.Constants.*;
+import static io.wazo.callkeep.Constants.ACTION_ANSWER_CALL;
+import static io.wazo.callkeep.Constants.ACTION_AUDIO_SESSION;
+import static io.wazo.callkeep.Constants.ACTION_CHECK_REACHABILITY;
+import static io.wazo.callkeep.Constants.ACTION_DTMF_TONE;
+import static io.wazo.callkeep.Constants.ACTION_END_CALL;
+import static io.wazo.callkeep.Constants.ACTION_HOLD_CALL;
+import static io.wazo.callkeep.Constants.ACTION_MUTE_CALL;
+import static io.wazo.callkeep.Constants.ACTION_ONGOING_CALL;
+import static io.wazo.callkeep.Constants.ACTION_UNHOLD_CALL;
+import static io.wazo.callkeep.Constants.ACTION_UNMUTE_CALL;
+import static io.wazo.callkeep.Constants.ACTION_WAKE_APP;
+import static io.wazo.callkeep.Constants.EXTRA_CALLER_NAME;
+import static io.wazo.callkeep.Constants.EXTRA_CALL_NUMBER;
+import static io.wazo.callkeep.Constants.EXTRA_CALL_UUID;
 import static io.wazo.callkeep.NotificationManagerKt.showCallNotification;
 
 import android.Manifest;
@@ -110,17 +123,17 @@ public class CallKeepModule {
             }
             break;
             case "displayIncomingCall": {
+                backToForeground();
                 final String uuid = (String) call.argument("uuid");
                 final String handle = (String) call.argument("handle");
                 final String localizedCallerName = (String) call.argument("localizedCallerName");
                 displayIncomingCall(uuid, handle, localizedCallerName);
                 result.success(null);
-
-                final HashMap<String, Object> map = new HashMap<>();
-                map.put("uuid", uuid);
-                map.put("handle", handle);
-                map.put("localizedCallerName", localizedCallerName);
-                _eventChannel.invokeMethod("DisplayIncomingCallAction", map);
+//                final HashMap<String, Object> map = new HashMap<>();
+//                map.put("uuid", uuid);
+//                map.put("handle", handle);
+//                map.put("localizedCallerName", localizedCallerName);
+//                _eventChannel.invokeMethod("DisplayIncomingCallAction", map);
             }
             break;
             case "answerIncomingCall": {
@@ -214,7 +227,8 @@ public class CallKeepModule {
             }
             break;
             case "backToForeground": {
-                backToForeground(result);
+                backToForeground();
+                result.success(true);
             }
             break;
             case "foregroundService": {
@@ -336,7 +350,7 @@ public class CallKeepModule {
 
     public void endCall(String uuid) {
         Log.d(TAG, "endCall called");
-        NotificationManagerKt.cancelCallNotification(_context, uuid);
+        NotificationManagerKt.cancelCallNotification(_context);
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }
@@ -580,7 +594,7 @@ public class CallKeepModule {
 
 
     @SuppressLint("WrongConstant")
-    public void backToForeground(@NonNull MethodChannel.Result result) {
+    public void backToForeground() {
         Context context = getAppContext();
         String packageName = context.getPackageName();
         Intent focusIntent = context.getPackageManager().getLaunchIntentForPackage(packageName).cloneFilter();
@@ -601,7 +615,6 @@ public class CallKeepModule {
                 context.startActivity(focusIntent);
             }
         }
-        result.success(isOpened);
     }
 
     private void initializeTelecomManager() {

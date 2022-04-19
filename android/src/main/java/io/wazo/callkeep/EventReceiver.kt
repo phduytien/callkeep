@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
-import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.util.*
 
@@ -54,7 +53,7 @@ class EventReceiver : BroadcastReceiver() {
                     attributeMap = bundleToMap(bundle)
                 )
 
-                NotificationManagerCompat.from(context).cancel(callId.hashCode())
+                cancelCallNotification(context)
             }
 
             Constants.ACTION_CALL_ACCEPT -> {
@@ -80,11 +79,11 @@ class EventReceiver : BroadcastReceiver() {
                     context = context,
                     attributeMap = bundleToMap(bundle)
                 )
-                NotificationManagerCompat.from(context).cancel(callId.hashCode())
+                cancelCallNotification(context)
                 val packageName = context.applicationContext.packageName
                 context.packageManager.getLaunchIntentForPackage(packageName)?.cloneFilter()?.run {
-                    intent.putExtras(bundle)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    this.putExtras(bundle)
+                    this.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(this)
                 }
             }

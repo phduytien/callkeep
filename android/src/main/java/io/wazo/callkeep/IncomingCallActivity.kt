@@ -1,20 +1,56 @@
 package io.wazo.callkeep
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import io.wazo.callkeep.Constants.ACTION_ANSWER_CALL
+import io.wazo.callkeep.Constants.ACTION_END_CALL
 import java.util.*
 
 class IncomingCallActivity : AppCompatActivity() {
+    private var voiceBroadcastReceiver: VoiceBroadcastReceiver? = null
+
+    inner class VoiceBroadcastReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                ACTION_END_CALL -> {
+                    finish()
+                }
+                ACTION_ANSWER_CALL -> {
+                    finish()
+                }
+            }
+        }
+    }
+
+    private fun registerReceiver() {
+        unregisterReceiver()
+        val voiceBroadcastReceiver = VoiceBroadcastReceiver()
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(ACTION_END_CALL)
+        intentFilter.addAction(ACTION_ANSWER_CALL)
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(voiceBroadcastReceiver, intentFilter)
+        this.voiceBroadcastReceiver = voiceBroadcastReceiver
+    }
+
+    private fun unregisterReceiver() {
+        voiceBroadcastReceiver?.let {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(it)
+        }
+        voiceBroadcastReceiver = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        registerReceiver()
         setContentView(R.layout.activity_incoming_call)
         val extras = intent.extras
         val callId = extras?.getString(Constants.EXTRA_CALL_UUID)
@@ -59,8 +95,8 @@ class IncomingCallActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        NotificationManagerCompat.from(this)
-            .cancel(intent.extras?.getString(Constants.EXTRA_CALL_UUID).hashCode())
+        cancelCallNotification(this)
+        unregisterReceiver()
         super.onDestroy()
     }
 }

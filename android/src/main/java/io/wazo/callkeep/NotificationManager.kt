@@ -18,11 +18,11 @@ import androidx.core.app.NotificationManagerCompat
 
 const val CALL_CHANNEL_ID = "calls_channel_id"
 const val CALL_CHANNEL_NAME = "Calls"
+const val incomingCallNotificationId = 766261102
 
-
-fun cancelCallNotification(context: Context, callId: String) {
+fun cancelCallNotification(context: Context) {
     val notificationManager = NotificationManagerCompat.from(context)
-    notificationManager.cancel(callId.hashCode())
+    notificationManager.cancel(766261102)
 }
 
 fun showCallNotification(
@@ -31,9 +31,14 @@ fun showCallNotification(
     name: String,
     phoneNumber: String
 ) {
+    cancelCallNotification(context)
+    try {
+        context.startActivity(createStartIncomingScreenIntent(context, uuid, name, phoneNumber))
+    } catch (ignore: Exception) {
+    }
     val notificationManager = NotificationManagerCompat.from(context)
 
-    val intent = createStartIncomingScreenIntent(context,uuid,name,phoneNumber)
+    val intent = createStartIncomingScreenIntent(context, uuid, name, phoneNumber)
 
     val pendingIntent = PendingIntent.getActivity(
         context,
@@ -72,7 +77,7 @@ fun showCallNotification(
 
     createCallNotificationChannel(notificationManager)
 
-    notificationManager.notify(uuid.hashCode(), builder.build())
+    notificationManager.notify(incomingCallNotificationId, builder.build())
 }
 
 fun buildRemoteView(
