@@ -602,26 +602,31 @@ public class CallKeepModule {
 
     @SuppressLint("WrongConstant")
     public void backToForeground() {
-        Context context = getAppContext();
-        String packageName = context.getPackageName();
-        Intent focusIntent = context.getPackageManager().getLaunchIntentForPackage(packageName).cloneFilter();
-        Activity activity = this._currentActivity;
-        boolean isOpened = activity != null;
-        Log.d(TAG, "backToForeground, app isOpened ?" + (isOpened ? "true" : "false"));
-        if (isOpened) {
-            focusIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            activity.startActivity(focusIntent);
-        } else {
-            focusIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK +
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED +
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD +
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-            if (activity != null) {
+        try{
+            Context context = getAppContext();
+            String packageName = context.getPackageName();
+            Intent focusIntent = context.getPackageManager().getLaunchIntentForPackage(packageName).cloneFilter();
+            Activity activity = this._currentActivity;
+            boolean isOpened = activity != null;
+            Log.d(TAG, "backToForeground, app isOpened ?" + (isOpened ? "true" : "false"));
+            if (isOpened) {
+                focusIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 activity.startActivity(focusIntent);
             } else {
-                context.startActivity(focusIntent);
+                focusIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK +
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED +
+                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD +
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+                if (activity != null) {
+                    activity.startActivity(focusIntent);
+                } else {
+                    context.startActivity(focusIntent);
+                }
             }
+        }catch (Exception ignore  ){
+
         }
+
     }
 
     private void initializeTelecomManager() {
