@@ -5,7 +5,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +19,7 @@ import java.util.*
 
 class IncomingCallActivity : AppCompatActivity() {
     private var voiceBroadcastReceiver: VoiceBroadcastReceiver? = null
+    private var vibrator: Vibrator? = null
 
     inner class VoiceBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -47,6 +51,28 @@ class IncomingCallActivity : AppCompatActivity() {
         }
         voiceBroadcastReceiver = null
     }
+
+    private fun startVibrator() {
+        vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator?.vibrate(
+                VibrationEffect.createWaveform(
+                    longArrayOf(0, 100, 1000, 300, 200, 100, 500, 200, 100),
+                    0
+                )
+            )
+        } else {
+            vibrator?.vibrate(
+                longArrayOf(0, 100, 1000, 300, 200, 100, 500, 200, 100),
+                0
+            )
+        }
+    }
+
+    private fun stopVibrator() {
+        vibrator?.cancel()
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,11 +118,13 @@ class IncomingCallActivity : AppCompatActivity() {
             )
             finish()
         }
+        startVibrator()
     }
 
     override fun onDestroy() {
         cancelCallNotification(this)
         unregisterReceiver()
+        stopVibrator()
         super.onDestroy()
     }
 }
