@@ -41,12 +41,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telecom.CallAudioState;
 import android.telecom.Connection;
 import android.telecom.PhoneAccount;
@@ -244,7 +246,12 @@ public class CallKeepModule {
                         if (extras != null) {
                             String uuid = extras.getString(EXTRA_CALL_UUID);
                             if (uuid != null) {
-                                result.success(uuid);
+//                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(_context);
+//                                final String key = "handled_"+uuid;
+//                                if(!sharedPreferences.getBoolean(key,false)){
+//                                    sharedPreferences.edit().putBoolean(key, true).apply();
+                                    result.success(uuid);
+//                                }
                                 return true;
                             }
                         }
@@ -595,26 +602,31 @@ public class CallKeepModule {
 
     @SuppressLint("WrongConstant")
     public void backToForeground() {
-        Context context = getAppContext();
-        String packageName = context.getPackageName();
-        Intent focusIntent = context.getPackageManager().getLaunchIntentForPackage(packageName).cloneFilter();
-        Activity activity = this._currentActivity;
-        boolean isOpened = activity != null;
-        Log.d(TAG, "backToForeground, app isOpened ?" + (isOpened ? "true" : "false"));
-        if (isOpened) {
-            focusIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            activity.startActivity(focusIntent);
-        } else {
-            focusIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK +
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED +
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD +
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-            if (activity != null) {
+        try{
+            Context context = getAppContext();
+            String packageName = context.getPackageName();
+            Intent focusIntent = context.getPackageManager().getLaunchIntentForPackage(packageName).cloneFilter();
+            Activity activity = this._currentActivity;
+            boolean isOpened = activity != null;
+            Log.d(TAG, "backToForeground, app isOpened ?" + (isOpened ? "true" : "false"));
+            if (isOpened) {
+                focusIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 activity.startActivity(focusIntent);
             } else {
-                context.startActivity(focusIntent);
+                focusIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK +
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED +
+                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD +
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+                if (activity != null) {
+                    activity.startActivity(focusIntent);
+                } else {
+                    context.startActivity(focusIntent);
+                }
             }
+        }catch (Exception ignore  ){
+
         }
+
     }
 
     private void initializeTelecomManager() {

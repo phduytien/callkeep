@@ -6,6 +6,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.media.AudioAttributes
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
@@ -16,8 +18,8 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
-const val CALL_CHANNEL_ID = "calls_channel_id"
-const val CALL_CHANNEL_NAME = "Calls"
+const val CALL_CHANNEL_ID = "incoming_call"
+const val CALL_CHANNEL_NAME = "Incoming Call"
 const val incomingCallNotificationId = 766261102
 
 fun cancelCallNotification(context: Context) {
@@ -47,15 +49,15 @@ fun showCallNotification(
         PendingIntent.FLAG_UPDATE_CURRENT
     )
 
-//    val ringtone: Uri = RingtoneManager.getActualDefaultRingtoneUri(
-//        context.applicationContext,
-//        RingtoneManager.TYPE_RINGTONE
-//    )
-
     val callTypeTitle = context.resources.getString(R.string.incoming_call)
 
     val builder: NotificationCompat.Builder =
         createCallNotification(context, name, callTypeTitle, pendingIntent)
+    val sound = Uri.parse(
+        ("android.resource://"
+                + context.packageName) + "/" + R.raw.ringtone_unique
+    )
+    builder.setSound(sound)
     val notificationLayout = buildRemoteView(context, uuid, name, phoneNumber)
     builder.setCustomBigContentView(notificationLayout)
     builder.setCustomHeadsUpContentView(notificationLayout)
@@ -75,7 +77,7 @@ fun showCallNotification(
     // Set notification color accent
     setNotificationColor(context, builder)
 
-    createCallNotificationChannel(notificationManager)
+    createCallNotificationChannel(notificationManager, sound)
 
     notificationManager.notify(incomingCallNotificationId, builder.build())
 }
@@ -128,7 +130,7 @@ fun createCallNotification(
 ): NotificationCompat.Builder {
     val notificationBuilder = NotificationCompat.Builder(context, CALL_CHANNEL_ID)
     notificationBuilder
-        .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+        .setDefaults(NotificationCompat.DEFAULT_SOUND)
         .setContentTitle(title)
         .setContentText(text)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -180,19 +182,19 @@ fun addCallFullScreenIntent(
     notificationBuilder.setFullScreenIntent(fullScreenPendingIntent, true)
 }
 
-fun createCallNotificationChannel(notificationManager: NotificationManagerCompat) {
+fun createCallNotificationChannel(notificationManager: NotificationManagerCompat, sound: Uri) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val channel = NotificationChannel(
             CALL_CHANNEL_ID,
             CALL_CHANNEL_NAME,
             NotificationManager.IMPORTANCE_HIGH
         )
-//        channel.setSound(
-//            sound, AudioAttributes.Builder()
-//                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-//                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-//                .build()
-//        )
+        channel.setSound(
+            sound, AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .build()
+        )
         notificationManager.createNotificationChannel(channel)
     }
 }

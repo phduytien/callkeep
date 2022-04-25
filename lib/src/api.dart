@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart'
     show BuildContext, Widget, showDialog, Container;
 import 'package:flutter/services.dart';
-import 'package:flutter/services.dart' show MethodChannel;
 
 import 'actions.dart';
 import 'event.dart';
@@ -61,20 +60,6 @@ class FlutterCallkeep extends EventManager {
   Future<bool> hasDefaultPhoneAccount(BuildContext context) async {
     _context = context;
     return true;
-  }
-
-  Future<bool?> _checkDefaultPhoneAccount() async {
-    return true;
-  }
-
-  Future<bool> _hasDefaultPhoneAccount() async {
-    final hasDefault = await _checkDefaultPhoneAccount();
-    final shouldOpenAccounts = await _alert(hasDefault);
-    if (shouldOpenAccounts) {
-      await _openPhoneAccounts();
-      return true;
-    }
-    return false;
   }
 
   Future<void> displayIncomingCall(String uuid, String handle,
