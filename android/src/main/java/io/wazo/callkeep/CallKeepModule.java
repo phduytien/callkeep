@@ -100,7 +100,7 @@ public class CallKeepModule {
     private ConstraintsMap _settings;
     Activity _currentActivity = null;
     MethodChannel _eventChannel;
-
+    boolean isOnCall = false;
     public CallKeepModule(Context context, BinaryMessenger messenger) {
         this._context = context;
         this._eventChannel = new MethodChannel(messenger, "FlutterCallKeep.Event");
@@ -125,19 +125,28 @@ public class CallKeepModule {
             }
             break;
             case "displayIncomingCall": {
-                backToForeground();
-                final String uuid = (String) call.argument("uuid");
-                final String handle = (String) call.argument("handle");
-                final String localizedCallerName = (String) call.argument("localizedCallerName");
-                displayIncomingCall(uuid, handle, localizedCallerName);
-                result.success(null);
+                if(!isOnCall){
+                    backToForeground();
+                    final String uuid = (String) call.argument("uuid");
+                    final String handle = (String) call.argument("handle");
+                    final String localizedCallerName = (String) call.argument("localizedCallerName");
+                    displayIncomingCall(uuid, handle, localizedCallerName);
+                    result.success(null);
 //                final HashMap<String, Object> map = new HashMap<>();
 //                map.put("uuid", uuid);
 //                map.put("handle", handle);
 //                map.put("localizedCallerName", localizedCallerName);
 //                _eventChannel.invokeMethod("DisplayIncomingCallAction", map);
+                } else {
+                    Log.i(TAG, "Incoming call screen is opened, reject this call!");
+                }
+                break;
             }
-            break;
+            case "isOnCall": {
+                Log.i(TAG, "update isONcAll");
+                isOnCall = call.argument("is_on_call");
+                break;
+            }
             case "answerIncomingCall": {
                 String uuid = (String) call.argument("uuid");
                 answerIncomingCall(uuid);
