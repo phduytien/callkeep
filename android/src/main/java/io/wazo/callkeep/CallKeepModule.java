@@ -41,12 +41,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telecom.CallAudioState;
 import android.telecom.Connection;
 import android.telecom.PhoneAccount;
@@ -142,6 +144,7 @@ public class CallKeepModule {
                 break;
             }
             case "isOnCall": {
+                CallContainer.INSTANCE.removeSavedUuid();
                 Log.i(TAG, "update isONcAll");
                 isOnCall = call.argument("is_on_call");
                 break;
@@ -250,24 +253,26 @@ public class CallKeepModule {
                 if (_currentActivity != null) {
                     Log.i(TAG, _currentActivity.getClass().getName());
                 }
+                String savedUuid = CallContainer.INSTANCE.getSavedUuid();
+                CallContainer.INSTANCE.removeSavedUuid();
+
                 Activity activity = _context instanceof Activity ? (Activity) _context : _currentActivity;
                 if (activity != null) {
                     Intent intent = activity.getIntent();
                     String uuid = getCallUuid(intent);
                     if (uuid == null) {
-                        uuid = CallContainer.INSTANCE.getSavedUuid();
+                        uuid = savedUuid;
                     }
                     if (uuid != null) {
-//                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(_context);
-//                                final String key = "handled_"+uuid;
-//                                if(!sharedPreferences.getBoolean(key,false)){
-//                                    sharedPreferences.edit().putBoolean(key, true).apply();
-                        result.success(uuid);
-//                                }
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(_context);
+                        final String key = "handled_" + uuid;
+                        if (!sharedPreferences.getBoolean(key, false)) {
+                            sharedPreferences.edit().putBoolean(key, true).apply();
+                            result.success(uuid);
+                        }
                         return true;
                     }
                 }
-                CallContainer.INSTANCE.removeSavedUuid();
                 result.success(null);
             }
             break;
