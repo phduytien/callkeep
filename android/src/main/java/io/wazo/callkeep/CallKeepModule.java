@@ -41,14 +41,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.telecom.CallAudioState;
 import android.telecom.Connection;
 import android.telecom.PhoneAccount;
@@ -101,6 +99,7 @@ public class CallKeepModule {
     Activity _currentActivity = null;
     MethodChannel _eventChannel;
     boolean isOnCall = false;
+
     public CallKeepModule(Context context, BinaryMessenger messenger) {
         this._context = context;
         this._eventChannel = new MethodChannel(messenger, "FlutterCallKeep.Event");
@@ -125,7 +124,7 @@ public class CallKeepModule {
             }
             break;
             case "displayIncomingCall": {
-                if(!isOnCall){
+                if (!isOnCall) {
                     backToForeground();
                     final String uuid = (String) call.argument("uuid");
                     final String handle = (String) call.argument("handle");
@@ -247,25 +246,28 @@ public class CallKeepModule {
                 result.success(null);
             }
             case "currentCallUuid": {
+                Log.i(TAG, _context.getClass().getName());
+                if (_currentActivity != null) {
+                    Log.i(TAG, _currentActivity.getClass().getName());
+                }
                 Activity activity = _context instanceof Activity ? (Activity) _context : _currentActivity;
                 if (activity != null) {
                     Intent intent = activity.getIntent();
-                    if (intent != null) {
-                        Bundle extras = intent.getExtras();
-                        if (extras != null) {
-                            String uuid = extras.getString(EXTRA_CALL_UUID);
-                            if (uuid != null) {
+                    String uuid = getCallUuid(intent);
+                    if (uuid == null) {
+                        uuid = CallContainer.INSTANCE.getSavedUuid();
+                    }
+                    if (uuid != null) {
 //                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(_context);
 //                                final String key = "handled_"+uuid;
 //                                if(!sharedPreferences.getBoolean(key,false)){
 //                                    sharedPreferences.edit().putBoolean(key, true).apply();
-                                    result.success(uuid);
+                        result.success(uuid);
 //                                }
-                                return true;
-                            }
-                        }
+                        return true;
                     }
                 }
+                CallContainer.INSTANCE.removeSavedUuid();
                 result.success(null);
             }
             break;
@@ -274,6 +276,15 @@ public class CallKeepModule {
         }
 
         return true;
+    }
+
+    String getCallUuid(Intent intent) {
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            String uuid = extras.getString(EXTRA_CALL_UUID);
+            return uuid;
+        }
+        return null;
     }
 
     public void setup(ConstraintsMap options) {
@@ -611,7 +622,7 @@ public class CallKeepModule {
 
     @SuppressLint("WrongConstant")
     public void backToForeground() {
-        try{
+        try {
             Context context = getAppContext();
             String packageName = context.getPackageName();
             Intent focusIntent = context.getPackageManager().getLaunchIntentForPackage(packageName).cloneFilter();
@@ -632,7 +643,7 @@ public class CallKeepModule {
                     context.startActivity(focusIntent);
                 }
             }
-        }catch (Exception ignore  ){
+        } catch (Exception ignore) {
 
         }
 

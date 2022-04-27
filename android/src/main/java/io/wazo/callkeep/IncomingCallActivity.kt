@@ -108,6 +108,7 @@ class IncomingCallActivity : AppCompatActivity() {
             val intent = focusIntent?.apply {
                 putExtras(bundle)
             }
+            CallContainer.saveUUid(callId)
             startActivity(intent)
             finish()
         }
