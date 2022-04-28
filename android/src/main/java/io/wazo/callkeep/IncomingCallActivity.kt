@@ -122,10 +122,14 @@ class IncomingCallActivity : AppCompatActivity() {
         startVibrator()
     }
 
+    override fun onPause() {
+        super.onPause()
+        stopVibrator()
+    }
+
     override fun onDestroy() {
         cancelCallNotification(this)
         unregisterReceiver()
-        stopVibrator()
         super.onDestroy()
     }
 }

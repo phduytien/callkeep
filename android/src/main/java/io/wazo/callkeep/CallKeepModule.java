@@ -255,21 +255,26 @@ public class CallKeepModule {
                 }
                 String savedUuid = CallContainer.INSTANCE.getSavedUuid();
                 CallContainer.INSTANCE.removeSavedUuid();
+                Log.i(TAG, "savedUuid = "+savedUuid);
 
                 Activity activity = _context instanceof Activity ? (Activity) _context : _currentActivity;
                 if (activity != null) {
+
                     Intent intent = activity.getIntent();
+                    if ((intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0){
+                        Log.i(TAG, "App open from recentask, uuid = null");
+                        // open from recent task
+                        result.success(null);
+                        return true;
+                    }
                     String uuid = getCallUuid(intent);
+                    Log.i(TAG, "intentUuid = "+uuid);
                     if (uuid == null) {
                         uuid = savedUuid;
                     }
                     if (uuid != null) {
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(_context);
-                        final String key = "handled_" + uuid;
-                        if (!sharedPreferences.getBoolean(key, false)) {
-                            sharedPreferences.edit().putBoolean(key, true).apply();
-                            result.success(uuid);
-                        }
+                        Log.i(TAG, "uuid = "+uuid);
+                        result.success(uuid);
                         return true;
                     }
                 }
