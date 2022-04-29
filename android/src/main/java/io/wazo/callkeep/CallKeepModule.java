@@ -41,14 +41,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.telecom.CallAudioState;
 import android.telecom.Connection;
 import android.telecom.PhoneAccount;
@@ -117,6 +115,13 @@ public class CallKeepModule {
         VoiceConnectionService.setPhoneAccountHandle(null);
         isReceiverRegistered = false;
     }
+    private void sendCallRequestToActivity(final String action, @Nullable final HashMap attributeMap) {
+        Intent intent = new Intent(action);
+        Bundle extras = new Bundle();
+        extras.putSerializable("attributeMap", attributeMap);
+        intent.putExtras(extras);
+        LocalBroadcastManager.getInstance(_context).sendBroadcast(intent);
+    }
 
     public boolean handleMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         switch (call.method) {
@@ -161,11 +166,12 @@ public class CallKeepModule {
             }
             break;
             case "endCall": {
+                HashMap<String, String> handle = new HashMap<>();
+                sendCallRequestToActivity(Constants.ACTION_END_CALL, handle);
                 endCall((String) call.argument("uuid"));
                 result.success(null);
             }
-            break;
-            case "endAllCalls": {
+            break; case "endAllCalls": {
                 endAllCalls();
                 result.success(null);
             }
@@ -507,6 +513,7 @@ public class CallKeepModule {
 
 
     public void rejectCall(String uuid) {
+        Log.d(TAG, "rejectCall called");
         if (!isConnectionServiceAvailable() || !hasPhoneAccount()) {
             return;
         }
@@ -515,7 +522,6 @@ public class CallKeepModule {
         if (conn == null) {
             return;
         }
-
         conn.onReject();
     }
 
